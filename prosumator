@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Ultimul Pas – Contract Prosumator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* ── TOKENS ── */
+    :root {
+      --g-deep:   #0C5230;
+      --g-mid:    #15803D;
+      --g-light:  #DCFCE7;
+      --g-text:   #166534;
+      --am-deep:  #78350F;
+      --am-mid:   #D97706;
+      --am-light: #FEF3C7;
+      --page:     #F2F6F3;
+      --card:     #FFFFFF;
+      --t1:       #0F1C13;
+      --t2:       #3D5244;
+      --t3:       #6B7F72;
+      --border:   #D9E4DB;
+      --r-card:   18px;
+      --r-btn:    10px;
+      --sh:       0 2px 12px rgba(0,0,0,.07), 0 1px 3px rgba(0,0,0,.04);
+      --sh-hover: 0 8px 28px rgba(0,0,0,.13), 0 2px 6px rgba(0,0,0,.06);
+      --ease:     .2s cubic-bezier(.4,0,.2,1);
+      box-sizing: border-box;
+      padding-top:    env(safe-area-inset-top,0px);
+      padding-bottom: env(safe-area-inset-bottom,0px);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --page:   #0D1A11;
+        --card:   #162119;
+        --t1:     #E8F5EC;
+        --t2:     #9CB8A4;
+        --t3:     #6B8A73;
+        --border: #253B2B;
+        --g-light:#14532D;
+        --am-light:#451A03;
+      }
+    }
+    :root[data-theme="dark"] {
+      --page:   #0D1A11;
+      --card:   #162119;
+      --t1:     #E8F5EC;
+      --t2:     #9CB8A4;
+      --t3:     #6B8A73;
+      --border: #253B2B;
+      --g-light:#14532D;
+      --am-light:#451A03;
+    }
+
+    *, *::before, *::after { box-sizing: inherit; margin: 0; padding: 0; }
+    html { scroll-padding-top: env(safe-area-inset-top,0px); }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--page);
+      color: var(--t1);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(145deg, #083D24 0%, #0C5230 45%, #15803D 100%);
+      color: #fff;
+      padding: 3.5rem 1.5rem 6.5rem;
+      text-align: center;
+      position: relative;
+      overflow: visible;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,.06) 1.5px, transparent 1.5px);
+      background-size: 28px 28px;
+      pointer-events: none;
+    }
+    .hero-inner { position: relative; z-index: 1; max-width: 640px; margin: 0 auto; }
+
+    .check-ring {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.12);
+      border: 2.5px solid rgba(255,255,255,.35);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.5rem;
+    }
+    .check-ring svg { width: 40px; height: 40px; }
+
+    .pill {
+      display: inline-block;
+      background: rgba(255,255,255,.15);
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 100px;
+      padding: .3rem 1rem;
+      font-size: .75rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      letter-spacing: .3px;
+    }
+
+    .hero h1 {
+      font-size: clamp(1.75rem, 4.5vw, 2.6rem);
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: .9rem;
+    }
+    .hero h1 em { font-style: normal; color: #86EFAC; }
+
+    .hero p {
+      font-size: .97rem;
+      opacity: .85;
+      max-width: 500px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* Progress dots */
+    .progress {
+      display: flex; align-items: center; justify-content: center;
+      gap: .45rem; margin-top: 2rem;
+    }
+    .pdot {
+      width: 9px; height: 9px; border-radius: 50%;
+      background: rgba(255,255,255,.3);
+    }
+    .pdot.done { background: rgba(255,255,255,.65); }
+    .pdot.active {
+      width: 30px; border-radius: 10px;
+      background: #fff;
+    }
+    .pline { width: 20px; height: 2px; background: rgba(255,255,255,.25); }
+
+    /* ── LAYOUT ── */
+    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 1.25rem; position: relative; }
+
+    .offset { margin-top: -3rem; position: relative; z-index: 10; }
+
+    section { padding: 2.5rem 0; }
+
+    .sec-label {
+      font-size: .8rem; font-weight: 700;
+      color: var(--g-text); margin-bottom: .35rem;
+      text-transform: uppercase; letter-spacing: .6px;
+    }
+    .sec-title {
+      font-size: 1.45rem; font-weight: 800;
+      color: var(--t1); margin-bottom: .35rem;
+    }
+    .sec-sub { font-size: .9rem; color: var(--t2); }
+
+    /* ── WHAT'S NEXT STRIP ── */
+    .next-strip {
+      background: var(--card);
+      border-radius: var(--r-card);
+      box-shadow: var(--sh);
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      overflow: hidden;
+    }
+    @media (max-width: 600px) {
+      .next-strip { grid-template-columns: 1fr; }
+    }
+    .next-item {
+      padding: 1.4rem 1.5rem;
+      display: flex; gap: 1rem; align-items: flex-start;
+    }
+    .next-item + .next-item { border-left: 1px solid var(--border); }
+    @media (max-width: 600px) {
+      .next-item + .next-item { border-left: none; border-top: 1px solid var(--border); }
+    }
+    .next-icon {
+      flex-shrink: 0;
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      background: var(--g-light);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .next-icon svg { width: 22px; height: 22px; color: var(--g-text); }
+    .next-text strong { font-size: .9rem; font-weight: 700; display: block; margin-bottom: .2rem; }
+    .next-text span { font-size: .8rem; color: var(--t2); line-height: 1.5; }
+
+    /* ── SUPPLIERS GRID ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    @media (max-width: 780px) { .grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .grid { grid-template-columns: 1fr; } }
+
+    .s-card {
+      background: var(--card);
+      border-radius: var(--r-card);
+      box-shadow: var(--sh);
+      padding: 1.5rem;
+      text-decoration: none;
+      color: inherit;
+      display: flex; flex-direction: column; gap: .85rem;
+      border-top: 4px solid var(--sc, #15803D);
+      transition: transform var(--ease), box-shadow var(--ease);
+      position: relative;
+      outline-offset: 3px;
+    }
+    .s-card:hover, .s-card:focus-visible {
+      transform: translateY(-5px);
+      box-shadow: var(--sh-hover);
+    }
+    .s-card:focus-visible { outline: 3px solid var(--sc, #15803D); }
+
+    .badge-pop {
+      position: absolute; top: 1rem; right: 1rem;
+      background: var(--am-light);
+      color: var(--am-deep);
+      font-size: .68rem; font-weight: 700;
+      padding: .18rem .55rem; border-radius: 100px;
+    }
+
+    .s-logo {
+      width: 52px; height: 52px; border-radius: 12px;
+      background: var(--sc, #15803D);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .95rem; font-weight: 800; color: #fff;
+      letter-spacing: -.5px; flex-shrink: 0;
+    }
+    .s-name { font-weight: 700; font-size: 1rem; line-height: 1.25; }
+    .s-desc { font-size: .8rem; color: var(--t2); line-height: 1.55; flex: 1; }
+    .s-link {
+      display: flex; align-items: center; gap: .35rem;
+      font-size: .8rem; font-weight: 600; color: var(--sc, #15803D);
+    }
+    .s-link svg { width: 13px; height: 13px; transition: transform var(--ease); }
+    .s-card:hover .s-link svg { transform: translateX(3px); }
+
+    /* ── INSURANCE CARD ── */
+    .ins-card {
+      background: linear-gradient(135deg, #3B1500 0%, #78350F 50%, #92400E 100%);
+      border-radius: 22px;
+      padding: clamp(2rem, 4vw, 2.8rem);
+      color: #fff;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 2rem;
+      align-items: center;
+      cursor: pointer;
+      border: none;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+      transition: transform var(--ease), box-shadow var(--ease);
+      box-shadow: 0 6px 24px rgba(120,53,15,.3);
+      position: relative;
+      overflow: hidden;
+    }
+    .ins-card::after {
+      content: '';
+      position: absolute;
+      top: -50px; right: -50px;
+      width: 220px; height: 220px;
+      border-radius: 50%;
+      background: rgba(245,158,11,.08);
+      pointer-events: none;
+    }
+    .ins-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(120,53,15,.4); }
+    .ins-card:focus-visible { outline: 3px solid #FCD34D; outline-offset: 3px; }
+    @media (max-width: 560px) {
+      .ins-card { grid-template-columns: 1fr; }
+      .ins-icon-col { display: none; }
+    }
+
+    .ins-eye { font-size: .75rem; font-weight: 700; color: #FCD34D; margin-bottom: .6rem; }
+    .ins-card h2 { font-size: clamp(1.15rem, 2.8vw, 1.6rem); font-weight: 800; line-height: 1.25; margin-bottom: .55rem; }
+    .ins-card p { font-size: .88rem; opacity: .82; line-height: 1.65; max-width: 480px; }
+    .ins-cta {
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: #F59E0B; color: #3B1500;
+      font-weight: 700; font-size: .88rem;
+      padding: .65rem 1.35rem;
+      border-radius: var(--r-btn);
+      margin-top: 1.2rem;
+      border: none; cursor: pointer;
+      font-family: inherit;
+      transition: background var(--ease);
+    }
+    .ins-cta:hover { background: #FBBF24; }
+
+    .ins-icon-col {
+      flex-shrink: 0;
+      width: 100px; height: 100px;
+      border-radius: 50%;
+      background: rgba(245,158,11,.12);
+      border: 2px solid rgba(245,158,11,.25);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; z-index: 1;
+    }
+    .ins-icon-col svg { width: 54px; height: 54px; }
+
+    /* ── FAQ ── */
+    .faq-list { display: flex; flex-direction: column; gap: .7rem; }
+    details.faq {
+      background: var(--card);
+      border-radius: 14px;
+      box-shadow: var(--sh);
+      overflow: hidden;
+    }
+    summary.faq-q {
+      padding: 1.15rem 1.5rem;
+      font-weight: 600; font-size: .93rem;
+      cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 1rem; list-style: none;
+      user-select: none;
+    }
+    summary.faq-q::-webkit-details-marker { display: none; }
+    .faq-icon {
+      flex-shrink: 0; width: 26px; height: 26px;
+      border-radius: 50%; background: var(--page);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform var(--ease), background var(--ease);
+    }
+    .faq-icon svg { width: 14px; height: 14px; color: var(--t2); }
+    details[open] .faq-icon { transform: rotate(45deg); background: var(--g-light); }
+    details[open] .faq-icon svg { color: var(--g-text); }
+    .faq-a {
+      padding: 0 1.5rem 1.15rem;
+      font-size: .87rem; color: var(--t2);
+      line-height: 1.7;
+      border-top: 1px solid var(--border);
+      padding-top: .9rem;
+    }
+
+    /* ── MODAL OVERLAY ── */
+    .overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      z-index: 100;
+      display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem;
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s ease;
+    }
+    .overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--card);
+      border-radius: 22px;
+      padding: 2rem;
+      width: 100%; max-width: 420px;
+      box-shadow: 0 24px 64px rgba(0,0,0,.22);
+      transform: translateY(18px) scale(.98);
+      transition: transform .25s ease;
+    }
+    .overlay.open .modal { transform: translateY(0) scale(1); }
+
+    .modal-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.4rem; }
+    .modal-mi {
+      width: 50px; height: 50px; border-radius: 14px;
+      background: var(--am-light);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal-mi svg { width: 28px; height: 28px; color: var(--am-deep); }
+    .modal-close-btn {
+      background: var(--page); border: none;
+      width: 34px; height: 34px; border-radius: 50%;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background var(--ease); flex-shrink: 0;
+    }
+    .modal-close-btn:hover { background: var(--border); }
+    .modal-close-btn svg { width: 16px; height: 16px; color: var(--t2); }
+
+    .modal h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: .3rem; }
+    .modal-sub { font-size: .83rem; color: var(--t2); margin-bottom: 1.4rem; line-height: 1.5; }
+
+    .form-group { margin-bottom: .95rem; }
+    .form-group label { display: block; font-size: .83rem; font-weight: 600; margin-bottom: .4rem; }
+    .form-group input {
+      width: 100%;
+      padding: .7rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--r-btn);
+      font-family: inherit; font-size: .93rem;
+      color: var(--t1); background: var(--page);
+      transition: border-color var(--ease), box-shadow var(--ease);
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: #F59E0B;
+      box-shadow: 0 0 0 3px rgba(245,158,11,.14);
+      background: var(--card);
+    }
+    .form-group input.err { border-color: #EF4444; }
+    .errmsg {
+      font-size: .76rem; color: #EF4444;
+      margin-top: .3rem; display: none;
+    }
+    .form-group input.err ~ .errmsg { display: block; }
+
+    .form-submit {
+      width: 100%; padding: .88rem;
+      background: linear-gradient(135deg, #78350F, #92400E);
+      color: #fff; border: none; border-radius: var(--r-btn);
+      font-size: .93rem; font-weight: 700; cursor: pointer;
+      margin-top: .4rem; font-family: inherit;
+      transition: opacity var(--ease);
+    }
+    .form-submit:hover { opacity: .88; }
+    .disclaimer { font-size: .73rem; color: var(--t3); text-align: center; margin-top: .75rem; line-height: 1.5; }
+
+    /* success */
+    .success { text-align: center; padding: 1rem 0; display: none; }
+    .success.show { display: block; }
+    .form-body.gone { display: none; }
+    .sc-ring {
+      width: 68px; height: 68px; border-radius: 50%;
+      background: var(--g-light);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 1.1rem;
+    }
+    .sc-ring svg { width: 34px; height: 34px; color: var(--g-mid); }
+    .success h4 { font-size: 1.1rem; font-weight: 700; margin-bottom: .4rem; }
+    .success p { font-size: .85rem; color: var(--t2); line-height: 1.6; }
+
+    /* ── FLOATING HELP ── */
+    .fab {
+      position: fixed;
+      bottom: calc(1.5rem + env(safe-area-inset-bottom,0px));
+      right: 1.5rem;
+      z-index: 50;
+      background: var(--g-deep);
+      color: #fff; border: none;
+      border-radius: 100px;
+      padding: .7rem 1.2rem;
+      font-size: .83rem; font-weight: 600;
+      cursor: pointer;
+      display: flex; align-items: center; gap: .45rem;
+      box-shadow: 0 4px 18px rgba(12,82,48,.4);
+      transition: transform var(--ease), box-shadow var(--ease);
+      font-family: inherit;
+      text-decoration: none;
+    }
+    .fab:hover { transform: translateY(-2px); box-shadow: 0 6px 22px rgba(12,82,48,.5); }
+    .fab svg { width: 17px; height: 17px; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: calc(5.5rem + env(safe-area-inset-bottom,0px));
+      left: 50%; transform: translateX(-50%) translateY(10px);
+      background: var(--t1); color: var(--card);
+      padding: .7rem 1.5rem; border-radius: 100px;
+      font-size: .83rem; font-weight: 500;
+      z-index: 200; opacity: 0;
+      transition: all .3s ease; white-space: nowrap;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── FOOTER ── */
+    .footer {
+      background: #0A1C0F;
+      color: rgba(255,255,255,.45);
+      text-align: center;
+      padding: 1.75rem 1.25rem;
+      font-size: .8rem;
+      margin-top: 1rem;
+      line-height: 1.7;
+    }
+    .footer strong { color: rgba(255,255,255,.75); }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; animation: none !important; }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+<body>
+
+<!-- ── HERO ── -->
+<header class="hero">
+  <div class="hero-inner">
+    <div class="check-ring">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#86EFAC" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    </div>
+    <div class="pill">Pasul 4 din 4 – Finalizare</div>
+    <h1>Felicitări! Racordarea dvs.<br>este <em>aproape finalizată</em></h1>
+    <p>Procesul de racordare a sistemului fotovoltaic a fost aprobat cu succes. Un singur pas a mai rămas: semnarea contractului de prosumator cu furnizorul dvs. de energie.</p>
+    <div class="progress">
+      <div class="pdot done"></div>
+      <div class="pline"></div>
+      <div class="pdot done"></div>
+      <div class="pline"></div>
+      <div class="pdot done"></div>
+      <div class="pline"></div>
+      <div class="pdot active"></div>
+    </div>
+  </div>
+</header>
+
+<!-- ── MAIN ── -->
+<main>
+  <div class="wrap">
+
+    <!-- WHAT'S NEXT -->
+    <div class="offset">
+      <div class="next-strip">
+        <div class="next-item">
+          <div class="next-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 12l2 2 4-4"/>
+            </svg>
+          </div>
+          <div class="next-text">
+            <strong>Alegeți furnizorul</strong>
+            <span>Selectați furnizorul cu care doriți să semnați contractul de prosumator.</span>
+          </div>
+        </div>
+        <div class="next-item">
+          <div class="next-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
+          <div class="next-text">
+            <strong>Semnați contractul</strong>
+            <span>Completați contractul de prosumator direct pe site-ul furnizorului sau fizic la ghișeu.</span>
+          </div>
+        </div>
+        <div class="next-item">
+          <div class="next-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+          </div>
+          <div class="next-text">
+            <strong>Deveniți prosumator activ</strong>
+            <span>Energia produsă de dvs. va fi injectată în rețea și compensată conform contractului.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUPPLIERS -->
+    <section>
+      <div class="section-hd" style="margin-bottom:1.6rem;">
+        <div class="sec-label">Furnizori de energie</div>
+        <div class="sec-title">Alegeți furnizorul dvs. de energie</div>
+        <div class="sec-sub">Apăsați pe cardul furnizorului cu care aveți contractul activ pentru a accesa secțiunea de prosumatori.</div>
+      </div>
+      <div class="grid" id="suppliers-grid">
+        <!-- populated by JS -->
+      </div>
+    </section>
+
+    <!-- INSURANCE -->
+      <div class="section-hd" style="margin-bottom:1.6rem;">
+     <div class="sec-title">Alege să-ți protejezi investiția</div>
+     </div>
+    <section style="padding-top:0;">
+      <button class="ins-card" id="ins-btn" aria-haspopup="dialog">
+        <div>
+          <div class="ins-eye">Sfat pentru prosumatori</div>
+          <h2>Știai că îți poți asigura sistemul fotovoltaic?</h2>
+          <p>Un sistem fotovoltaic este o investiție importantă. Îl poți proteja împotriva furtunilor, grindinei și ploii, incendiilor, trasnetelor si fulgerelor căderea obiectelor și căderea unei aeronave și a altor riscuri cu o asigurare potrivită. Solicită o ofertă gratuită fără obligații pentru a afla costul si limitele asigurării</p>
+          <div class="ins-cta">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            Solicită ofertă gratuită
+          </div>
+        </div>
+        <div class="ins-icon-col" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+            <path d="M12 8v1m0 6v1M8 12h1m6 0h1" stroke="#FCD34D" stroke-width="1"/>
+          </svg>
+        </div>
+      </button>
+    </section>
+
+    <!-- FAQ -->
+    <section>
+      <div style="margin-bottom:1.4rem;">
+        <div class="sec-label">Întrebări frecvente</div>
+        <div class="sec-title">Ai întrebări despre contractul de prosumator?</div>
+      </div>
+      <div class="faq-list">
+        <details class="faq">
+          <summary class="faq-q">
+            Ce documente sunt necesare pentru contractul de prosumator?
+            <div class="faq-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </div>
+          </summary>
+          <div class="faq-a">De regulă, veți avea nevoie de: actul de identitate, certificatul de racordare emis de operatorul de distribuție, un extras de cont bancar activ și factura recentă de energie electrică. Furnizorul vă poate solicita și documente suplimentare în funcție de tipul instalației.</div>
+        </details>
+        <details class="faq">
+          <summary class="faq-q">
+            Cât durează procesul de semnare a contractului de prosumator?
+            <div class="faq-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </div>
+          </summary>
+          <div class="faq-a">De obicei, procesul de semnare a contractului durează între 1 și 10 zile lucrătoare de la depunerea tuturor documentelor necesare. Unii furnizori permit semnarea electronică a contractului, ceea ce poate reduce semnificativ durata procesului.</div>
+        </details>
+        <details class="faq">
+          <summary class="faq-q">
+            Ce se întâmplă cu energia produsă în exces?
+            <div class="faq-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </div>
+          </summary>
+          <div class="faq-a">Energia produsă în exces este injectată în rețeaua națională de electricitate. Ca prosumator, aceasta se compensează cu energia consumată din rețea. Diferența netă se calculează lunar sau anual, conform contractului semnat cu furnizorul dvs. Dacă energia produsă depășește consumul pe un an, furnizorul vă va plăti diferența la un preț stabilit contractual.</div>
+        </details>
+        <details class="faq">
+          <summary class="faq-q">
+            Pot schimba furnizorul după ce am semnat contractul de prosumator?
+            <div class="faq-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </div>
+          </summary>
+          <div class="faq-a">Da, puteti schimba furnizorul, dar trebuie să respectați termenele de preaviz prevăzute în contract (de regulă 21 de zile calendaristice) și va trebui să semnați un nou contract de prosumator cu noul furnizor. Verificați clauzele contractului actual înainte de a lua o decizie.</div>
+        </details>
+      </div>
+    </section>
+
+  </div><!-- /.wrap -->
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <strong>Prosumator</strong><br>
+  Aveți întrebări? Contacteaza-mă apeland la <strong>0739 375 070</strong> (gratuit)
+</footer>
+
+<!-- FLOATING HELP -->
+<a class="fab" href="tel:0739375070" aria-label="Sună pentru ajutor">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 01.22 1.18 2 2 0 012.18 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.09a16 16 0 006 6l.56-.55a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+  </svg>
+  Ai nevoie de ajutor?
+</a>
+
+<!-- TOAST -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-mi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>
+      <button class="modal-close-btn" id="modal-close" aria-label="Închide fereastra">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <h3 id="modal-title">Asigurare sistem fotovoltaic</h3>
+    <p class="modal-sub">Completați formularul de mai jos și vă voi contacta cu o ofertă personalizată, fără nicio obligație din partea dvs.</p>
+
+    <div class="form-body" id="form-body">
+      <div class="form-group">
+        <label for="f-prenume">Prenume</label>
+        <input type="text" id="f-prenume" placeholder="ex. Ion" autocomplete="given-name">
+        <div class="errmsg" id="err-prenume">Introduceți prenumele dvs.</div>
+      </div>
+      <div class="form-group">
+        <label for="f-nume">Nume</label>
+        <input type="text" id="f-nume" placeholder="ex. Popescu" autocomplete="family-name">
+        <div class="errmsg" id="err-nume">Introduceți numele dvs.</div>
+      </div>
+      <div class="form-group">
+        <label for="f-tel">Număr de telefon</label>
+        <input type="tel" id="f-tel" placeholder="ex. 07xx xxx xxx" autocomplete="tel">
+        <div class="errmsg" id="err-tel">Introduceți un număr de telefon valid (07xx xxx xxx).</div>
+      </div>
+      <button class="form-submit" id="form-submit">Trimite cererea</button>
+      <p class="disclaimer">Datele dvs. sunt confidențiale și nu vor fi transmise unor terțe părți fără acordul dvs.</p>
+    </div>
+
+    <div class="success" id="success-state">
+      <div class="sc-ring">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <h4>Cerere trimisă cu succes!</h4>
+      <p>Vă mulțumim! O sa revin în cel mai scurt timp cu o ofertă personalizată pentru asigurarea sistemului dvs. fotovoltaic.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  emailjs.init('AfH-b9MvoRontbjtX');
+
+  /* ── SUPPLIERS DATA ── */
+  var suppliers = [
+    {
+      name: 'E.ON Energie România',
+      initials: 'E.ON',
+      color: '#C8001D',
+      url: 'https://www.eon.ro/servicii-suport-clienti/prosumator',
+      desc: 'Furnizor major cu rețea extinsă în Moldova și Transilvania, parte din grupul E.ON Europa.',
+      popular: true
+    },
+    {
+      name: 'Hidroelectrica',
+      initials: 'HE',
+      color: '#00529B',
+      url: 'https://client.hidroelectrica.ro/contractare-prosumator',
+      desc: 'Cel mai mare producător hidro din România, acum și furnizor retail cu tarife competitive.',
+      popular: false
+    },
+    {
+      name: 'PPC România',
+      initials: 'PPC',
+      color: '#005F9E',
+      url: 'mailto:prosumatori@ppcgroup.com?subject=Solicitare%20Contract%20de%20prosumator&body=Buna%20ziua%2C%0AVa%20las%20atasat%20mai%20jos%20Certificatul%20de%20racordare%20in%20vederea%20emiterii%20Contractului%20de%20prosumator.%0ADaca%20mai%20este%20ceva%20nevoie%20va%20rog%20sa%20imi%20comunicati.%0AVa%20multumesc!',
+      desc: 'Prezență în Muntenia, Banat și Dobrogea. Trimiteți solicitarea direct prin email către echipa de prosumatori PPC.',
+      popular: false,
+      isMail: true
+    },
+    {
+      name: 'Electrica Furnizare',
+      initials: 'EL',
+      color: '#0050A0',
+      url: 'https://www.electrica.ro',
+      desc: 'Acoperire în Muntenia Nord, Transilvania și Moldova. Cel mai mare distribuitor național de energie.',
+      popular: false
+    },
+    
+    
+    {
+      name: 'Engie România',
+      initials: 'ENG',
+      color: '#0091CC',
+      url: 'https://www.engie.ro',
+      desc: 'Furnizor de energie electrică și gaze naturale, cu pachete dedicate prosumatorilor solari.',
+      popular: false
+    },
+    
+    {
+      name: 'CEZ Vânzare',
+      initials: 'CEZ',
+      color: '#E07000',
+      url: 'https://www.cez-vanzare.ro',
+      desc: 'Furnizor de energie cu acoperire în Oltenia și alte zone, parte din grupul CEZ.',
+      popular: false
+    }
+  ];
+
+  /* ── BUILD SUPPLIER CARDS ── */
+  var grid = document.getElementById('suppliers-grid');
+  suppliers.forEach(function(s) {
+    var a = document.createElement('a');
+    a.className = 's-card';
+    a.href = s.url;
+    if (s.isMail) {
+      a.setAttribute('aria-label', 'Trimite email la ' + s.name);
+    } else {
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.setAttribute('aria-label', 'Accesează site-ul ' + s.name);
+    }
+    a.style.setProperty('--sc', s.color);
+
+    var linkIcon = s.isMail
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+    var linkLabel = s.isMail ? 'Trimite email' : 'Accesează site-ul';
+
+    a.innerHTML =
+      (s.popular ? '<span class="badge-pop">Cel mai ales</span>' : '') +
+      '<div class="s-logo">' + s.initials + '</div>' +
+      '<div class="s-name">' + s.name + '</div>' +
+      '<div class="s-desc">' + s.desc + '</div>' +
+      '<div class="s-link">' + linkLabel + linkIcon + '</div>';
+
+    grid.appendChild(a);
+  });
+
+  /* ── MODAL ── */
+  var overlay    = document.getElementById('overlay');
+  var insBtn     = document.getElementById('ins-btn');
+  var modalClose = document.getElementById('modal-close');
+
+  function openModal() {
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    modalClose.focus();
+  }
+  function closeModal() {
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+    insBtn.focus();
+  }
+
+  insBtn.addEventListener('click', openModal);
+  modalClose.addEventListener('click', closeModal);
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) closeModal();
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal();
+  });
+
+  /* ── FORM VALIDATION ── */
+  var phoneRe = /^07[0-9]{8}$/;
+
+  function getVal(id) { return document.getElementById(id).value.trim(); }
+  function setErr(inputId, errId, show) {
+    var inp = document.getElementById(inputId);
+    var err = document.getElementById(errId);
+    if (show) { inp.classList.add('err'); }
+    else       { inp.classList.remove('err'); }
+  }
+
+  document.getElementById('form-submit').addEventListener('click', function() {
+    var prenume = getVal('f-prenume');
+    var nume    = getVal('f-nume');
+    var tel     = getVal('f-tel').replace(/\s/g, '');
+
+    var okP = prenume.length >= 2;
+    var okN = nume.length >= 2;
+    var okT = phoneRe.test(tel);
+
+    setErr('f-prenume', 'err-prenume', !okP);
+    setErr('f-nume',    'err-nume',    !okN);
+    setErr('f-tel',     'err-tel',     !okT);
+
+    if (okP && okN && okT) {
+      var btn = document.getElementById('form-submit');
+      btn.disabled = true;
+      btn.textContent = 'Se trimite...';
+
+      emailjs.send('service_8apb6ti', 'template_mhdmpry', {
+        prenume: prenume,
+        nume:    nume,
+        telefon: tel
+      }).then(function() {
+        document.getElementById('form-body').classList.add('gone');
+        document.getElementById('success-state').classList.add('show');
+        showToast('Cerere trimisă! Vă voi contacta în curând.');
+      }).catch(function(err) {
+        btn.disabled = false;
+        btn.textContent = 'Trimite cererea';
+        showToast('Eroare la trimitere. Încercați din nou.');
+        console.error('EmailJS error:', err);
+      });
+    }
+  });
+
+  /* ── CLEAR ERR ON INPUT ── */
+  ['f-prenume','f-nume','f-tel'].forEach(function(id) {
+    document.getElementById(id).addEventListener('input', function() {
+      this.classList.remove('err');
+    });
+  });
+
+  /* ── TOAST ── */
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, 3500);
+  }
+</script>
+</body>
+</html>
